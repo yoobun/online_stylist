@@ -1,0 +1,103 @@
+.title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 3.5vw;
+}
+
+.description {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 25px;
+}
+
+.body-container {
+    max-width: 25rem;
+    position: relative;
+    margin-left: 30%;
+}
+
+.about-subtitle {
+    font-family: 'Playfair Display', serif;
+    color: #4286F3;
+}
+
+.subtitle {
+    font-family: 'Playfair Display', serif;
+    font-size: 50px;
+}
+
+.highlighted {
+    color: #4286F3;
+}
+
+.fixed-image {
+    position: fixed;
+    top: 2.5%;
+    right: 2%;
+    width: 100%;
+    z-index: 100;
+}
+
+.mt-custom {
+    margin-top: 4.5vw;
+}
+
+.ml-custom {
+    margin-left: 6vw;
+}
+
+.m-nav {
+    margin-top: 6vw;
+    margin-bottom: 6vw;
+}
+
+.button {
+    border-color: #4286F3;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 50px;
+    border-width: 2px;
+    padding-top: 1px;
+    padding-bottom: 2px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.txtbox {
+    background-color: rgba(138, 180, 248, 0.26);
+    font-family:'IBM Plex Mono', monospace;
+    border: none;
+}
+
+.pieces {
+    height: 75vh;
+    display: flex;
+    align-items: center;
+}
+
+.input_area {
+    display: inline-flex;
+}
+
+.ml-submit {
+    margin-inline-start: 50px;
+}
+
+.ml-input {
+    margin-left: 200px;
+
+}
+
+.ml-results {
+    margin-left: 100px;
+}
+
+.mr-results {
+    margin-right: 200px;
+}
+
+.gg-arrow-right {
+    /* This value will multiple the actual size  */
+    --ggs: 2;
+}
+
+#brands_list {
+    border: 2px solid #4286F3;
+}
