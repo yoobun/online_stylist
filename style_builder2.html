@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- jquery -->
+        <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+        <!-- CSS stylesheet -->
+        <link rel="stylesheet" href="/static/style.css">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300&family=Playfair+Display+SC&family=Playfair+Display:ital,wght@0,400;0,600;1,500&display=swap" rel="stylesheet">
+
+        <!-- icon -->
+        <link href='https://unpkg.com/css.gg@2.0.0/icons/css/arrow-right.css' rel='stylesheet'>
+
+        <title>world wide wardbrobe</title>
+    </head>
+
+    <script>
+
+        var style_data = {{ data | tojson }}
+
+        $(function(){
+            load_style_data()
+        });
+
+        function load_style_data() {
+            likes = style_data["likes"]
+
+            styles = style_data["styles"]
+
+            suggestions = style_data["suggestions"]
+        }
+
+        /*user styles*/
+        $(function() {
+            $("#submit_styles").click(function(){
+                let styles = $("#styles").val()
+                $.when(submit_user_info(styles)).then(get_suggestions_gpt)
+                //submit_user_info(styles)
+            })
+        });
+
+        function submit_user_info(styles) {
+            let data = {"styles": styles}
+            $.ajax({
+                type: "POST",
+                url: "/user-styles",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                
+                data : JSON.stringify(data),
+                success: function (data, text) {
+                    style_data = data
+                }
+            });
+        }
+
+        /* get suggestions */
+        function get_suggestions_gpt() {
+            let data = {}
+            $.ajax({
+                type: "POST",
+                url: "/style_suggestions",
+                dataType: "json",
+                contentType: "applications/json; charset=utf-8",
+                data: JSON.stringify(data),
+
+                success: function(data, text){
+                    console.log("submit_styles response")
+                    console.log(data)
+                    style_data = data 
+                    //show_suggestions(style_data)
+                },
+            }); 
+        }   
+
+    </script>
+
+    <body>
+        <div class="container-fluid" id="header">
+            <div class="d-flex bg-white mt-md-5 ml-md-4">
+                <div class="p-2 mr-auto bg-white">
+                    <h1 class="display-4" style="font-family: 'IBM Plex Mono', monospace;">www.worldwide<span class="highlighted", style="font-weight: bold;">wardrobe</span>.com/build-my-style</h1>
+                </div>
+                <div class="p-2 bg-white">
+                    <a href="{{ url_for('home') }}">
+                        <img src="/static/logo.jpg" class="img-fluid fixed-image" style="width:150px" id="logo-img">
+                    </a>
+                </div>
+        </div>
+        <div class="container-fluid">
+            <div class="pieces ml-input">
+                <div class="col-md-8">
+                    <div class="d-flex flex-column" id="style-suggestions">
+                        <div class="p-2">
+                            <h2 class="subtitle">what styles do you like to wear?</h2>
+                            <h2 class="ml-5 small" style="font-family: PlayFair Display, serif; font-size: 25px;">give 2-5 styles</h2>
+                        </div>
+                        <div class="p-2 input_area" style="max-width: 75%;">
+                            <textarea id="styles" class="form-control txtbox" rows="10"></textarea> 
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <a href="{{ url_for('suggestions') }}">
+                        <button id="submit_styles" type="button" class="btn"><i class="gg-arrow-right"></i></button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

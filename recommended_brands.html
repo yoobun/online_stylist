@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- jquery -->
+        <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+        <!-- CSS stylesheet -->
+        <link rel="stylesheet" href="/static/style.css">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300&family=Playfair+Display+SC&family=Playfair+Display:ital,wght@0,400;0,600;1,500&display=swap" rel="stylesheet">
+
+        <!-- icon -->
+        <link href='https://unpkg.com/css.gg@2.0.0/icons/css/arrow-right.css' rel='stylesheet'>
+
+        <title>world wide wardbrobe</title>
+    </head>
+
+    <script>
+
+        var style_data = {{ data | tojson }}
+
+        $(function(){
+            load_style_data()
+
+            $('#brands_list').hide();
+            $('#loading-box').show();
+
+            setTimeout(function () {
+                fetchRecommendations();
+            }, 62000); // 1 minute delay
+
+        });
+
+        function load_style_data() {
+
+            styles = style_data["styles"]
+
+            brands = style_data["brands"]
+
+            brand_recommendations = style_data["recommendations"]
+        }
+
+        function fetchRecommendations() {
+            $.ajax({
+                url: '/explore_brands', // Adjust the route to fetch recommendations
+                type: 'POST',
+                success: function (data) {
+                    // Update style_data with fetched recommendations
+                    style_data["recommendations"] = data["recommendations"];
+                    
+                    $('#loading-box').hide();
+
+                    // Call the function to display recommendations
+                    show_recommendations(style_data);
+                },
+                error: function (error) {
+                    $('#loadingContainer').hide();
+
+                    console.log('Error fetching recommendations data: ', error);
+                }
+            });
+        }
+
+         /*show brand recs*/
+         function show_recommendations(data) {
+            let recommendations = data["recommendations"];
+            $("#generate_list").empty();
+
+            $.each(recommendations, function (i, recommendation) {
+                let brand = recommendation.brand;
+                let images = recommendation.imgs;
+
+                // Create a new div for each recommendation
+                let newDiv = $("<div>").addClass("recommendation");
+
+                // Add the brand information
+                $("<p>").text(brand).addClass("ml-5 mr-5 mb-3").appendTo(newDiv);
+
+                // Add the images
+                $.each(images, function (j, imgUrl) {
+                    $("<img>").attr("src", imgUrl).addClass("img-fluid mb-5").css("height", "250px").css("width", "20%").appendTo(newDiv);
+                });
+
+                // Append the recommendation to the container
+                $("#generate_list").append(newDiv);
+                $('#brands_list').show();
+            });
+        }
+
+    </script>
+
+    <body>
+        <div class="container-fluid" id="header">
+            <div class="d-flex bg-white mt-md-5 ml-md-4">
+                <div class="p-2 mr-auto bg-white">
+                    <h1 class="display-4" style="font-family: 'IBM Plex Mono', monospace;">www.worldwide<span class="highlighted", style="font-weight: bold;">wardrobe</span>.com/results</h1>
+                </div>
+                <div class="p-2 bg-white">
+                    <a href="{{ url_for('home') }}">
+                        <img src="/static/logo.jpg" class="img-fluid fixed-image" style="width:150px" id="logo-img">
+                    </a>
+                </div>
+        </div>
+        <div class="container-fluid ml-custom mt-5">
+            <h2 class="subtitle">five brands, hand-picked just for you to explore</h2>
+        </div>
+        <div id="loading-box" class="text-center mt-5">
+            <div id="loading-spinner" class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <span id="loading-text" class="ml-2" style="font-family: 'IBM Plex Mono', monospace;">Loading brands...</span>
+        </div>
+        <div id="brands_list" class="mt-5 mb-5 container col-md-6">
+            <div id="generate_list" class="mt-5" style="font-family: 'IBM Plex Mono', monospace;">
+            </div>
+        </div>
+    </body>
+</html>

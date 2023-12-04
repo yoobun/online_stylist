@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--Required meta tags-->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+        <!-- jquery -->
+        <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="new.css">
+
+        <title>style finder</title>
+    </head>
+
+    <script>
+    var style_data = {{ data | tojson }}
+
+    $(function(){
+        load_style_data()
+    });
+
+    function load_style_data() {
+        //loads use case
+        //use = style_data["use case"]
+
+        likes = style_data["likes"]
+
+        styles = style_data["styles"]
+
+        brands = style_data["brands"]
+
+        suggestions = style_data["suggestions"]
+        if(suggestions.length > 0){
+            show_suggestions(style_data)
+        }
+
+        brand_recommendations = style_data["recommendations"]
+        if(brand_recommendations.length > 0){
+            show_recommendations(style_data)
+        }
+
+    }
+
+    /*use
+    $(function() {
+        $("#expand_style_btn").click(function(){
+            $("#style_likes").show()
+            
+            let use = $("#expand_style_btn").text()
+            submit_use(use)
+        })
+    });
+
+    function submit_use(use) {
+        let data = {"use case":use}
+        $.ajax({
+            type: "POST",
+            url: "/submit_use",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            
+            data : JSON.stringify(data),
+            success: function (data, text) {
+                style_data = data
+            }
+        });
+    }*/
+
+    /*user info*/
+    $(function() {
+        $("#submit_likes").click(function(){
+            let likes = $("#likes").val()
+            let styles = $("#styles").val()
+            $.when(submit_user_info(likes, styles)).then(get_suggestions_gpt)
+        })
+    });
+
+    function submit_user_info(likes, styles) {
+        let data = {"likes": likes, "styles": styles}
+        $.ajax({
+            type: "POST",
+            url: "/user_info",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            
+            data : JSON.stringify(data),
+            success: function (data, text) {
+                style_data = data
+            }
+        });
+    }
+
+    /*suggestions*/
+    function show_suggestions(data) {
+        let suggestions = data["suggestions"]
+        $("#generate_sugestions").empty()
+        $.each(suggestions, function(i,sug){
+            let new_div = $("<div id=sugs class=text wrap>")
+            $(new_div).text(sug).click(function(x){
+                console.log("sug"+sug)
+            })
+
+            $("#generate_sugestions").append(new_div)
+        })
+    }
+
+    function get_suggestions_gpt() {
+        let data = {}
+        $.ajax({
+            type: "POST",
+            url: "/style_suggestions",
+            dataType: "json",
+            contentType: "applications/json; charset=utf-8",
+            data: JSON.stringify(data),
+
+            success: function(data, text){
+                console.log("submit_styles response")
+                console.log(data)
+                style_data = data 
+                show_suggestions(style_data)
+            },
+        }); 
+    }
+
+    /*brands list*/
+    $(function() {
+        $("#submit_brands").click(function(){
+            let brands = $("#brands").val()
+            $.when(submit_brands(brands)).then(get_brands_gpt)
+        })
+    });
+
+    function submit_brands(brands) {
+        let data = {"brands": brands}
+        $.ajax({
+            type: "POST",
+            url: "/submit_brands",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            
+            data : JSON.stringify(data),
+            success: function (data, text) {
+                style_data = data
+            }
+        });
+    }
+
+    function show_recommendations(data) {
+        let recommendations = data["recommendations"];
+        $("#generate_brands").empty();
+
+        $.each(recommendations, function (i, recommendation) {
+            let brand = recommendation.brand;
+            let images = recommendation.imgs;
+
+            // Create a new div for each recommendation
+            let newDiv = $("<div>").addClass("recommendation").addClass("col-md-10");
+
+            // Add the brand information
+            $("<p>").text(brand).appendTo(newDiv);
+
+            // Add the images
+            $.each(images, function (j, imgUrl) {
+                $("<img>").attr("src", imgUrl).appendTo(newDiv);
+            });
+
+            // Append the recommendation to the container
+            $("#generate_brands").append(newDiv);
+        });
+    }
+
+    /*function show_brand_list(data) {
+        let recommendations = data["recommendations"]
+        $("#generate_brands").empty()
+        $.each(recommendations, function(i, info){
+            queries = []
+            let brand = info.brand
+
+            queries.push(brand)
+            let new_brand_div = $("<div class='brand_div'>")
+            
+        })
+        $("#generate_brands").append(new_brand_div)
+    } 
+
+        /*for(var i = 0; i < brands_list.length; i++) {
+            var brandRec = brands_list[i]
+            //var brandName = brandRec.brand;
+            queries.push(brandRec)
+
+            let new_brand_div = $("<div class='brand_div'>")
+            $(new_brand_div).text(brand).click(function(x){
+                console.log("brand"+brand)
+            })
+
+            $("#generate_brands").append(new_brand_div)
+        }
+        /*$.each(brands_list, function(i,brand){
+            queries = []
+            queries.push(brand)
+            let new_brand_div = $("<div class='brand_div'>")
+            $(new_brand_div).text(brand).click(function(x){
+                console.log("brand"+brand)
+            })
+
+            $("#generate_brands").append(new_brand_div)
+        })*/
+    //}
+
+    function get_brands_gpt() {
+        let data = {}
+        $.ajax({
+            type: "POST",
+            url: "/brand_suggestions",
+            dataType: "json",
+            contentType: "applications/json; charset=utf-8",
+            data: JSON.stringify(data),
+
+            success: function(data, text){
+                console.log("submit_brands response")
+                console.log(data)
+                style_data = data 
+                show_recommendations(style_data)
+            },
+        }); 
+    }
+
+    </script>
+    
+    <body>
+        <!--<h1>let's get to know you!</h1>
+        <label>what are you looking for?</label>
+        <br>
+        <button id="expand_style_btn">expand my style</button><br>-->
+        <div>
+            <h1>let's find out what you like wear!</h1>
+            <div class="input">
+                <label>what pieces and colors you like to wear? list 5-10 things!</label><br>
+                <textarea id="likes" class="txt" rows="1" cols="40"></textarea><br>
+            </div>
+            <div id="style_likes", class="input">
+                <label>what styles do you like to wear? list 3-5 styles!</label><br>
+                <textarea id = "styles" class="txt" rows="1" cols="40"></textarea><br>
+            </div>
+            <button id="submit_likes" type="button">submit</button>
+            <div id = "generate_sugestions" class="col-md-6">
+    
+            </div>
+            <h1>what brands do you like?</h1>
+            <div class="input">
+                <label>list 5-10 brands you like to shop at!</label><br>
+                <textarea id = "brands" class="txt" rows="1" cols="40"></textarea><br>
+            </div>
+            <button id="submit_brands" type="button">submit</button>
+            <div id = "generate_brands" class="col-md-10">
+            </div>
+        </div>
+    </body>
+        
+</html>

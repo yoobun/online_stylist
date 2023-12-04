@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- jquery -->
+        <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+        <!-- CSS stylesheet -->
+        <link rel="stylesheet" href="/static/style.css">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300&family=Playfair+Display+SC&family=Playfair+Display:ital,wght@0,400;0,600;1,500&display=swap" rel="stylesheet">
+
+        <!-- icon -->
+        <link href='https://unpkg.com/css.gg@2.0.0/icons/css/arrow-right.css' rel='stylesheet'>
+
+        <title>world wide wardbrobe</title>
+    </head>
+
+    <script>
+
+        var style_data = {{ data | tojson }}
+
+        $(function(){
+            load_style_data()
+
+            $('#suggestions_list').hide();
+            $('#loading-box').show();
+
+            setTimeout(function () {
+                fetchSuggestions();
+            }, 30000); // 1 minute delay
+            
+        });
+       
+        function load_style_data() {
+            likes = style_data["likes"]
+
+            styles = style_data["styles"]
+
+            suggestions = style_data["suggestions"]
+        }
+
+        function fetchSuggestions() {
+            $.ajax({
+                url: '/build-my-style', 
+                type: 'POST',
+                success: function (data) {
+                    // Update style_data with fetched recommendations
+                    style_data["suggestions"] = data["suggestions"];
+                    
+                    $('#loading-box').hide();
+
+                    // Call the function to display recommendations
+                    show_suggestions(style_data);
+                },
+                error: function (error) {
+                    $('#loadingContainer').hide();
+
+                    console.log('Error fetching recommendations data: ', error);
+                }
+            });
+        }
+
+         /*show suggestions*/
+        function show_suggestions(data) {
+            let suggestions = data["suggestions"]
+            $("#generate_sugestions").empty()
+            $.each(suggestions, function(i,sug){
+                let new_div = $("<div id=sugs class=col-md-6>").addClass("mb-5")
+
+                $(new_div).text(sug).click(function(x){
+                    console.log("sug"+sug)
+                })
+
+                $("#generate_sugestions").append(new_div)
+                $("#suggestions_list").show()
+            })
+        }
+
+    </script>
+
+    <body>
+        <div class="container-fluid" id="header">
+            <div class="d-flex bg-white mt-md-5 ml-md-4">
+                <div class="p-2 mr-auto bg-white">
+                    <h1 class="display-4" style="font-family: 'IBM Plex Mono', monospace;">www.worldwide<span class="highlighted", style="font-weight: bold;">wardrobe</span>.com/results</h1>
+                </div>
+                <div class="p-2 bg-white">
+                    <a href="{{ url_for('home') }}">
+                        <img src="/static/logo.jpg" class="img-fluid fixed-image" style="width:150px" id="logo-img">
+                    </a>
+                </div>
+        </div>
+        <div class="container-fluid ml-custom mt-5">
+            <h2 class="subtitle">your tailored style suggestions</h2>
+        </div>
+        <div id="loading-box" class="text-center mt-5">
+            <div id="loading-spinner" class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <span id="loading-text" class="ml-2" style="font-family: 'IBM Plex Mono', monospace;">Loading style suggestions...</span>
+        </div>
+        <div id="suggestions_list" class="container-fluid ml-5">
+            <div id="generate_sugestions" class="row mt-5 ml-results mr-results" style="font-family: 'IBM Plex Mono', monospace;">
+        
+            </div>
+        </div>
+    </body>
+</html>
